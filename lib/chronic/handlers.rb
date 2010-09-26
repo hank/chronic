@@ -287,7 +287,7 @@ module Chronic
     end
     
     def handle_s_r_p(tokens, options) #:nodoc:
-      repeater = tokens[1].get_tag(Repeater)
+      #repeater = tokens[1].get_tag(Repeater)
             
       # span = 
       # case true
@@ -380,7 +380,8 @@ module Chronic
       end
       
       puts "--#{outer_span}" if Chronic.debug
-      anchor = find_within(repeaters, outer_span, pointer)
+      # anchor = 
+      find_within(repeaters, outer_span, pointer)
     end
     
     def get_repeaters(tokens) #:nodoc:
