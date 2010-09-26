@@ -1,8 +1,8 @@
 SPEC = Gem::Specification.new do |s|
-  s.name = 'pangel-chronic'
-  s.version = '0.3.11'
-  s.author = 'Tom Preston-Werner'
-  s.email = 'tom@rubyisawesome.com'
+  s.name = 'hank-chronic'
+  s.version = '0.3.12'
+  s.author = 'Tom Preston-Werner, Hank'
+  s.email = 'tom@rubyisawesome.com, ralree@gmail.com'
   s.homepage = 'http://chronic.rubyforge.org'
   s.platform = Gem::Platform::RUBY
   s.summary = "A natural language date parser with timezone support"
