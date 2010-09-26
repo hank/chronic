@@ -497,6 +497,7 @@ module Chronic
     end
     
     def match(tokens, definitions)
+      tokens = stripanchors(tokens)
       token_index = 0
       @pattern.each do |element|
         name = element.to_s
@@ -521,6 +522,22 @@ module Chronic
       end
       return false if token_index != tokens.size
       return true
+    end
+
+    def stripanchors(tokens)
+      beg = first_not_anchor_index(tokens)
+      fin = last_not_anchor_index(tokens)
+      return [] unless beg and fin
+      tokens[beg..fin]
+    end
+    
+    def last_not_anchor_index(tokens)
+      tokens.rindex { |e| not e.get_tag(Separator) } 
+    end
+    
+    def first_not_anchor_index(tokens)
+      return nil unless index = tokens.reverse.rindex { |e| not e.get_tag(Separator) }
+      tokens.length - (index + 1)
     end
 
     def ==(other)
