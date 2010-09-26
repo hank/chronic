@@ -138,12 +138,12 @@ module Chronic
       text.gsub!(/\bNew Year'?s Day\b/i, 'january 1')
       # (3rd Monday of January, traditionally 15 Jan.)
       text.gsub!(/\b(Martin Luther King.*?Day|MLK day)\b/i, 
-                 "3rd monday of january")
+                 "3rd monday in january")
       text.gsub!(/\bGroundhog Day\b/i, 'february 2')
       text.gsub!(/\bValentine'?s Day\b/i, 'february 14')
       # (officially George Washington's Birthday
       # 3rd Monday of February, traditionally 22 Feb.)
-      text.gsub!(/\bPresident'?s Day\b/i, "3rd monday of february")
+      text.gsub!(/\bPresident'?s Day\b/i, "3rd monday in february")
       text.gsub!(/\b(St.?|Saint) Patrick'?s Day\b/, 'march 17')
       text.gsub!(/\bApril Fool'?s'? Day\b/i, 'april 1') 
       text.gsub!(/\bEarth Day\b/i, 'april 22')
@@ -173,7 +173,7 @@ module Chronic
       # (Friday after Thanksgiving Day)
       #text.gsub!(/\bBlack Friday\b/i, Chronic.parse("4th thursday in november") + 86400)
       text.gsub!(/\bChristmas Eve\b/i, 'december 24')
-      text.gsub!(/\b(Christmas Day|Christmas (?!Eve))\b/i, 'december 25')
+      text.gsub!(/\b(Christmas Day|Christmas.*?(?!Eve))\b/i, 'december 25')
       text.gsub!(/\bKwanzaa\b/i, 'december 26')
       text.gsub!(/\bNew Year'?s Eve\b/i, 'december 31')
     end
@@ -185,12 +185,14 @@ module Chronic
     def pre_normalize(text) #:nodoc:
       normalized_text = text.to_s.downcase
       normalized_text = numericize_numbers(normalized_text)
-      # completely removing periods breaks decimal minutes, etc.
-      # tests indicate a period should really act as a : in time
-      # and a - in the date.  Not exactly sure what to do with that.
-      # If between numbers, assume time and make it a colon.
-      # Will not work for a date like 10.15.2010
-      normalized_text.gsub!(/([0-9])[\.]([0-9])/, '\1:\2')
+      # Tests indicate a period should really act as a : in time
+      # and a - in the date. 
+      # If the date is formatted as a 1-2.1-2.4 digit, change to -
+      # eg. 1.4.2010 becomes 1-4-2010, 05.23.2011 becomes 05-23-2011
+      normalized_text.gsub!(/(\d{1,2})\.(\d{1,2})\.(\d{4})/, '\1-\2-\3')
+      normalized_text.gsub!(/(\d{4})\.(\d{1,2})\.(\d{1,2})/, '\1-\2-\3')
+      # If between numbers now, assume time and make it a colon.
+      normalized_text.gsub!(/([0-9])\.([0-9])/, '\1:\2')
   
       # probably not time now, so let's make the rest a space
       normalized_text.gsub!(/['"\.,]/, ' ')

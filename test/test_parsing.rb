@@ -167,6 +167,7 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("2006-08-20 15:30.30")
     assert_equal Time.local(2006, 8, 20, 15, 30, 30), time
+
     
     # rdn_rm_rd_rt_rtz_ry
     
@@ -190,6 +191,40 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("1800-08-20")
     assert_equal Time.local(1800, 8, 20, 12), time
+
+    # Dot separated
+    time = parse_now("2000.1.1")
+    assert_equal Time.local(2000, 1, 1, 12), time
+
+    time = parse_now("1.1.2000")
+    assert_equal Time.local(2000, 1, 1, 12), time
+
+    time = parse_now("01.31.2000")
+    assert_equal Time.local(2000, 1, 31, 12), time
+
+    time = parse_now("01.1.2000")
+    assert_equal Time.local(2000, 1, 1, 12), time
+
+    time = parse_now("1.01.2000")
+    assert_equal Time.local(2000, 1, 1, 12), time
+
+    time = parse_now("2006.08.20")
+    assert_equal Time.local(2006, 8, 20, 12), time
+    
+    time = parse_now("2006.08.20 7pm")
+    assert_equal Time.local(2006, 8, 20, 19), time
+    
+    time = parse_now("2006.08.20 03:00")
+    assert_equal Time.local(2006, 8, 20, 3), time
+    
+    time = parse_now("2006.08.20 03:30:30")
+    assert_equal Time.local(2006, 8, 20, 3, 30, 30), time
+    
+    time = parse_now("2006.08.20 15:30:30")
+    assert_equal Time.local(2006, 8, 20, 15, 30, 30), time
+    
+    time = parse_now("2006.08.20 15:30.30")
+    assert_equal Time.local(2006, 8, 20, 15, 30, 30), time
   end
   
   def test_parse_guess_r
@@ -594,8 +629,8 @@ class TestParsing < Test::Unit::TestCase
     time = parse_now("10th wednesday in november")
     assert_equal nil, time
     
-    # time = parse_now("3rd wednesday in 2007")
-    # assert_equal Time.local(2007, 1, 20, 12), time
+    time = parse_now("3rd wednesday in 2007")
+    assert_equal Time.local(2007, 1, 20, 12), time
   end
   
   def test_parse_guess_o_r_g_r
@@ -607,6 +642,22 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("4th day last week")
     assert_equal Time.local(2006, 8, 9, 12), time
+  end
+
+  def test_parse_guess_holiday
+    time = parse_now("christmas")
+    assert_equal Time.local(2006, 12, 25, 12), time
+
+    time = parse_now("Independence Day")
+    assert_equal Time.local(2007, 7, 4, 12), time
+
+    time = parse_now("last MLK day")
+    comp_time = parse_now("3rd monday in last january")
+    assert_equal comp_time, time
+
+    time = parse_now("MLK day")
+    comp_time = parse_now("3rd monday in january")
+    assert_equal comp_time, time
   end
   
   def test_parse_guess_nonsense

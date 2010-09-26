@@ -287,7 +287,8 @@ module Chronic
     end
     
     def handle_s_r_p(tokens, options) #:nodoc:
-      #repeater = tokens[1].get_tag(Repeater)
+      #repeater = 
+      tokens[1].get_tag(Repeater)
             
       # span = 
       # case true
