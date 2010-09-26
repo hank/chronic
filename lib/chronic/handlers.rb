@@ -48,6 +48,7 @@ module Chronic
                   
        # 3rd week in march
        :narrow => [Handler.new([:ordinal, :repeater, :separator_in, :repeater], :handle_o_r_s_r),
+                #   Handler.new(['last', :repeater, :separator_in, :repeater], :handle_last_r_s_r),
                    Handler.new([:ordinal, :repeater, :grabber, :repeater], :handle_o_r_g_r)]
       }
       
@@ -330,6 +331,11 @@ module Chronic
         end
       end
       span
+    end
+
+    def handle_last_r_s_r(tokens, options) #:nodoc:
+      outer_span = get_anchor([tokens[3]], options)
+      handle_orr(tokens[0..1], outer_span, options)
     end
     
     def handle_o_r_s_r(tokens, options) #:nodoc:

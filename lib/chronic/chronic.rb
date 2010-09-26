@@ -1,3 +1,5 @@
+require 'time'
+
 module Chronic
   class << self
     
@@ -102,6 +104,79 @@ module Chronic
         return span
       end
     end
+    # Find the n-th day of the given month
+    # Day is integer, distance from Sunday (Sunday = 0, Saturday = 6)
+    # Month is string, needs to be parsed by Time class
+    # n is integer, can be 'last' or -1 - 4, -1 means last
+    # Returns String of month and day number (eg. "January 3")
+    def day_in_month(day, n, month)
+      t = Time.parse("#{month} 1")
+      # Move to the first day
+      t += (7 - (day - t.wday).abs) * 86400 if t.wday != day
+      return nil if n < -1 or n > 4
+      mon = t.mon
+      if n == -1
+        while t.mon == mon
+          day = t
+          t += 86400 * 7 # Add a week
+        end
+      else
+        day = t
+        (n - 1).times do
+          day = t
+          t += 86400 * 7 # Add a week
+          break if t.mon != mon
+        end
+      end
+      "#{month} #{day.mday}"
+    end
+
+    # Convert US holidays to their respective dates in the calendar year
+    # TODO: Add your country's holidays!  Must implement a way to filter.
+    # Religious holidays mostly omitted due to movability.  Please add.
+    def parse_holidays(text)
+      text.gsub!(/\bNew Year'?s Day\b/i, 'january 1')
+      # (3rd Monday of January, traditionally 15 Jan.)
+      text.gsub!(/\b(Martin Luther King.*?Day|MLK day)\b/i, 
+                 "3rd monday of january")
+      text.gsub!(/\bGroundhog Day\b/i, 'february 2')
+      text.gsub!(/\bValentine'?s Day\b/i, 'february 14')
+      # (officially George Washington's Birthday
+      # 3rd Monday of February, traditionally 22 Feb.)
+      text.gsub!(/\bPresident'?s Day\b/i, "3rd monday of february")
+      text.gsub!(/\b(St.?|Saint) Patrick'?s Day\b/, 'march 17')
+      text.gsub!(/\bApril Fool'?s'? Day\b/i, 'april 1') 
+      text.gsub!(/\bEarth Day\b/i, 'april 22')
+      # (last Friday of April)
+      text.gsub!(/\bArbor Day\b/i, 'last friday in april')
+      text.gsub!(/\bCinco De Mayo\b/i, 'may 5')
+      # (2nd Sunday of May)
+      text.gsub!(/\bMother'?s Day\b/i, '2nd sunday in may')
+      # (last Monday of May, traditionally 30 May)
+      text.gsub!(/\bMemorial Day\b/i, 'last monday in may')
+      # (3rd Sunday of June)
+      text.gsub!(/\bFather'?s Day\b/i, '3rd sunday in june')
+      text.gsub!(/\bIndependence Day\b/i, 'july 4')
+      # (first Monday of September)
+      text.gsub!(/\bLabor Day\b/, '1st monday in september')
+      text.gsub!(/\bPatriot Day\b/, 'september 11')
+      # (Sunday after Labor Day)
+      #text.gsub!(/\bGrandparent'?s Day\b/i, Chronic.parse("1st monday in september") + 6 * 86400)
+      text.gsub!(/\bConstitution Day\b/i, 'september 17')
+      text.gsub!(/\bLeif Erikson Day\b/, 'october 9')
+      # (2nd Monday of October, traditionally 12 Oct.)
+      text.gsub!(/\bColumbus Day\b/, "2nd monday in october")
+      text.gsub!(/\bHalloween\b/i, 'october 31')
+      text.gsub!(/\bVeterans Day\b/i, 'november 11')
+      # (4th Thursday of November)
+      text.gsub!(/\bThanksgiving\b/i, "4th thursday in november")
+      # (Friday after Thanksgiving Day)
+      #text.gsub!(/\bBlack Friday\b/i, Chronic.parse("4th thursday in november") + 86400)
+      text.gsub!(/\bChristmas Eve\b/i, 'december 24')
+      text.gsub!(/\b(Christmas Day|Christmas (?!Eve))\b/i, 'december 25')
+      text.gsub!(/\bKwanzaa\b/i, 'december 26')
+      text.gsub!(/\bNew Year'?s Eve\b/i, 'december 31')
+    end
     
     # Clean up the specified input text by stripping unwanted characters,
     # converting idioms to their canonical form, converting number words
@@ -113,6 +188,7 @@ module Chronic
       normalized_text.gsub!(/['"\.,]/, '')
       normalized_text.gsub!(/ \-(\d{4})\b/, ' tzminus\1')
       normalized_text.gsub!(/([\/\-\,\@])/) { ' ' + $1 + ' ' }
+      parse_holidays(normalized_text)
       normalized_text.gsub!(/\btoday\b/, 'this day')
       normalized_text.gsub!(/\btomm?orr?ow\b/, 'next day')
       normalized_text.gsub!(/\byesterday\b/, 'last day')
