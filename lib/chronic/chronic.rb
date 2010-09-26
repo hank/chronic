@@ -185,7 +185,15 @@ module Chronic
     def pre_normalize(text) #:nodoc:
       normalized_text = text.to_s.downcase
       normalized_text = numericize_numbers(normalized_text)
-      normalized_text.gsub!(/['"\.,]/, '')
+      # completely removing periods breaks decimal minutes, etc.
+      # tests indicate a period should really act as a : in time
+      # and a - in the date.  Not exactly sure what to do with that.
+      # If between numbers, assume time and make it a colon.
+      # Will not work for a date like 10.15.2010
+      normalized_text.gsub!(/([0-9])[\.]([0-9])/, '\1:\2')
+  
+      # probably not time now, so let's make the rest a space
+      normalized_text.gsub!(/['"\.,]/, ' ')
       normalized_text.gsub!(/ \-(\d{4})\b/, ' tzminus\1')
       normalized_text.gsub!(/([\/\-\,\@])/) { ' ' + $1 + ' ' }
       parse_holidays(normalized_text)
@@ -274,28 +282,33 @@ module Chronic
   # A Span represents a range of time. Since this class extends
   # Range, you can use #begin and #end to get the beginning and
   # ending times of the span (they will be of class Time)
-  class Span < Range   
-    # Returns the width of this span in seconds   
+  class Span < Range
+    # Returns the width of this span in seconds
     def width
       (self.end - self.begin).to_i
     end
-    
-    # Add a number of seconds to this span, returning the 
+
+    # Add a number of seconds to this span, returning the
     # resulting Span
     def +(seconds)
       Span.new(self.begin + seconds, self.end + seconds)
     end
-    
-    # Subtract a number of seconds to this span, returning the 
+
+    # Subtract a number of seconds to this span, returning the
     # resulting Span
     def -(seconds)
       self + -seconds
     end
-    
+
     # Prints this span in a nice fashion
     def to_s
       '(' << self.begin.to_s << '..' << self.end.to_s << ')'
     end
+    
+    unless RUBY_VERSION =~ /1\.9\./
+      alias :cover? :include?
+    end
+    
   end
 
   # Tokens are tagged with subclassed instances of this class when

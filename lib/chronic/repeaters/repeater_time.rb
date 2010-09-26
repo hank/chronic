@@ -22,6 +22,7 @@ class Chronic::RepeaterTime < Chronic::Repeater #:nodoc:
     def to_s
       @time.to_s + (@ambiguous ? '?' : '')
     end
+      
   end
   
   def initialize(time, options = {})
@@ -38,7 +39,7 @@ class Chronic::RepeaterTime < Chronic::Repeater #:nodoc:
       when 4
         ambiguous = time =~ /:/ && t[0..0].to_i != 0 && t[0..1].to_i <= 12
         hours = t[0..1].to_i
-        hours == 12 ? Tick.new(0 * 60 * 60 + t[2..3].to_i * 60, ambiguous) : Tick.new(hours * 60 * 60 + t[2..3].to_i * 60, ambiguous)
+        (hours == 12 && time =~ /:/) ? Tick.new(0 * 60 * 60 + t[2..3].to_i * 60, ambiguous) : Tick.new(hours * 60 * 60 + t[2..3].to_i * 60, ambiguous)
       when 5
         Tick.new(t[0..0].to_i * 60 * 60 + t[1..2].to_i * 60 + t[3..4].to_i, true)
       when 6
@@ -74,21 +75,21 @@ class Chronic::RepeaterTime < Chronic::Repeater #:nodoc:
       catch :done do
         if pointer == :future
           if @type.ambiguous?
-            [midnight + @type + offset_fix, midnight + half_day + @type + offset_fix, tomorrow_midnight + @type].each do |t|
+            [midnight + @type.time + offset_fix, midnight + half_day + @type.time + offset_fix, tomorrow_midnight + @type.time].each do |t|
               (@current_time = t; throw :done) if t >= @now
             end
           else
-            [midnight + @type + offset_fix, tomorrow_midnight + @type].each do |t|
+            [midnight + @type.time + offset_fix, tomorrow_midnight + @type.time].each do |t|
               (@current_time = t; throw :done) if t >= @now
             end
           end
         else # pointer == :past
           if @type.ambiguous?
-            [midnight + half_day + @type + offset_fix, midnight + @type + offset_fix, yesterday_midnight + @type + half_day].each do |t|
+            [midnight + half_day + @type.time + offset_fix, midnight + @type.time + offset_fix, yesterday_midnight + @type.time + half_day].each do |t|
               (@current_time = t; throw :done) if t <= @now
             end
           else
-            [midnight + @type + offset_fix, yesterday_midnight + @type].each do |t|
+            [midnight + @type.time + offset_fix, yesterday_midnight + @type.time].each do |t|
               (@current_time = t; throw :done) if t <= @now
             end
           end

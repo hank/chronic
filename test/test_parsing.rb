@@ -88,8 +88,8 @@ class TestParsing < Test::Unit::TestCase
     time = parse_now("jan 3 2010 at 4", :ambiguous_time_range => :none)
     assert_equal Time.local(2010, 1, 3, 4), time
     
-    #time = parse_now("January 12, '00")
-    #assert_equal Time.local(2000, 1, 12, 12), time
+    time = parse_now("January 12, '00")
+    assert_equal Time.local(2000, 1, 12, 12), time
     
     time = parse_now("may 27, 1979")
     assert_equal Time.local(1979, 5, 27, 12), time
@@ -122,6 +122,9 @@ class TestParsing < Test::Unit::TestCase
     time = parse_now("5/27/1979 4am")
     assert_equal Time.local(1979, 5, 27, 4), time
     
+    time = parse_now("5/24/10")
+    assert_equal Time.local(2010, 5, 24, 12), time
+
     # sd_sm_sy
     
     time = parse_now("27/5/1979")
@@ -140,6 +143,7 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("13/06")
     assert_equal nil, time
+    
     
     # sy_sm_sd
     
@@ -175,19 +179,17 @@ class TestParsing < Test::Unit::TestCase
     
     # rm_sd_rt
     
-    #time = parse_now("jan 5 13:00")
-    #assert_equal Time.local(2007, 1, 5, 13), time
-    
-    # due to limitations of the Time class, these don't work
+    time = parse_now("jan 5 13:00")
+    assert_equal Time.local(2007, 1, 5, 13), time
     
     time = parse_now("may 40")
-    assert_equal nil, time
+    assert_equal Time.local(1940, 5, 16, 12), time
     
     time = parse_now("may 27 40")
-    assert_equal nil, time
+    assert_equal Time.local(1940, 5, 27, 12), time
     
     time = parse_now("1800-08-20")
-    assert_equal nil, time
+    assert_equal Time.local(1800, 8, 20, 12), time
   end
   
   def test_parse_guess_r
@@ -211,6 +213,18 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("november")
     assert_equal Time.local(2006, 11, 16), time
+    
+    time = parse_now("1234")
+    assert_equal Time.local(2006, 8, 17, 12, 34), time
+    
+    time = Chronic.parse("1234", :now => Time.local(2006, 8, 16, 3, 0, 0, 0), :ambiguous_time_range => :none)
+    assert_equal Time.local(2006, 8, 16, 12, 34), time
+    
+    time = parse_now("0034")
+    assert_equal Time.local(2006, 8, 17, 0, 34), time
+    
+    time = parse_now("1730")
+    assert_equal Time.local(2006, 8, 16, 17, 30), time
   end
   
   def test_parse_guess_rr
@@ -471,6 +485,12 @@ class TestParsing < Test::Unit::TestCase
     
     time = parse_now("1 month ago")
     assert_equal Time.local(2006, 7, 16, 14), time
+    
+    time = parse_now("1 month ago", :now => Time.local(2010,05,31,14))
+    assert_equal Time.local(2010, 04, 30, 14), time
+
+    time = parse_now("1 month ago", :now => Time.local(2010,03,31,14))
+    assert_equal Time.local(2010, 02, 28, 14), time
     
     time = parse_now("1 fortnight ago")
     assert_equal Time.local(2006, 8, 2, 14), time
